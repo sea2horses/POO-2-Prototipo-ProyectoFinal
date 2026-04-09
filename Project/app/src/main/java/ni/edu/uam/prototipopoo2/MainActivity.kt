@@ -22,10 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import ni.edu.uam.prototipopoo2.ui.theme.PrototipoPOO2Theme
 
 class MainActivity : ComponentActivity() {
@@ -44,12 +46,10 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(navController: NavHostController) {
-    val navController = rememberNavController()
-
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Prototipo POO2") },
+                title = { Text("Mascotas Felices") },
             )
         },
         bottomBar = {
@@ -62,12 +62,37 @@ fun AppNavigation(navController: NavHostController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("home") { HomeScreen() }
+            
+            // Ruta para ver los detalles (Próximamente)
+            composable(
+                route = "detalle/{idMascota}",
+                arguments = listOf(navArgument("idMascota") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getInt("idMascota") ?: 1
+                DetalleMascota(idMascota = id)
+            }
+
+            // Nueva ruta para ver los resultados
+            composable(
+                route = "resultado/{idMascota}",
+                arguments = listOf(navArgument("idMascota") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getInt("idMascota") ?: 1
+                Resultado(
+                    idMascota = id,
+                    onNavigateHome = {
+                        navController.navigate("home") {
+                            popUpTo("home") { inclusive = true }
+                        }
+                    }
+                )
+            }
         }
     }
 }
 
 @Composable
-fun BottomNavBar(navController: androidx.navigation.NavHostController) {
+fun BottomNavBar(navController: NavHostController) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
 
@@ -84,16 +109,16 @@ fun BottomNavBar(navController: androidx.navigation.NavHostController) {
             label = { Text("Inicio") }
         )
 
+        // Botón temporal para probar la pantalla de resultados
         NavigationBarItem(
-            selected = currentDestination?.hierarchy?.any { it.route == "formulario" } == true,
+            selected = currentDestination?.hierarchy?.any { it.route?.startsWith("resultado") == true } == true,
             onClick = {
-                navController.navigate("formulario") {
+                navController.navigate("resultado/1") {
                     launchSingleTop = true
                 }
             },
-            icon = { Icon(Icons.Default.List, contentDescription = "Formulario") },
-            label = { Text("Formulario") }
+            icon = { Icon(Icons.Default.List, contentDescription = "Prueba") },
+            label = { Text("Prueba Res") }
         )
     }
 }
-
