@@ -4,6 +4,6 @@ import androidx.compose.runtime.Composable
 
 // TODO: Pantalla de Detalle de Mascota que diriga al formulario de adopcion
 @Composable
-fun DetalleMascota(idMascota: Int) {
+fun DetalleMascota(idMascota: Int = 0) {
 
 }

@@ -4,22 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -34,8 +25,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PrototipoPOO2Theme {
-                val navController = rememberNavController()
-                AppNavigation(navController = navController)
+                var isLoggedIn by remember { mutableStateOf(false) }
+
+                if (!isLoggedIn) {
+                    // Pantalla de Login que bloquea el resto de la app
+                    IniciarSesion(onLoginSuccess = { isLoggedIn = true })
+                } else {
+                    // App principal con navegación tras el login
+                    val navController = rememberNavController()
+                    AppScaffold(navController = navController)
+                }
             }
         }
     }
@@ -43,15 +42,8 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation(navController: NavHostController) {
-    val navController = rememberNavController()
-
+fun AppScaffold(navController: NavHostController) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Prototipo POO2") },
-            )
-        },
         bottomBar = {
             BottomNavBar(navController)
         }
@@ -62,22 +54,24 @@ fun AppNavigation(navController: NavHostController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("home") { HomeScreen() }
+            composable("formulario") { FormularioAdopcion() }
         }
     }
 }
 
 @Composable
-fun BottomNavBar(navController: androidx.navigation.NavHostController) {
+fun BottomNavBar(navController: NavHostController) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
 
-    NavigationBar() {
+    NavigationBar {
         NavigationBarItem(
             selected = currentDestination?.hierarchy?.any { it.route == "home" } == true,
             onClick = {
                 navController.navigate("home") {
-                    popUpTo("home")
+                    popUpTo("home") { saveState = true }
                     launchSingleTop = true
+                    restoreState = true
                 }
             },
             icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
@@ -89,11 +83,11 @@ fun BottomNavBar(navController: androidx.navigation.NavHostController) {
             onClick = {
                 navController.navigate("formulario") {
                     launchSingleTop = true
+                    restoreState = true
                 }
             },
-            icon = { Icon(Icons.Default.List, contentDescription = "Formulario") },
-            label = { Text("Formulario") }
+            icon = { Icon(Icons.Default.List, contentDescription = "Adoptar") },
+            label = { Text("Adoptar") }
         )
     }
 }
-
