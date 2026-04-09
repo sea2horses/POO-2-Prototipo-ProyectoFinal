@@ -63,6 +63,15 @@ fun AppNavigation(navController: NavHostController) {
         ) {
             composable("home") { HomeScreen() }
             
+            // Ruta para ver los detalles (Próximamente)
+            composable(
+                route = "detalle/{idMascota}",
+                arguments = listOf(navArgument("idMascota") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getInt("idMascota") ?: 1
+                DetalleMascota(idMascota = id)
+            }
+
             // Nueva ruta para ver los resultados
             composable(
                 route = "resultado/{idMascota}",
@@ -98,6 +107,18 @@ fun BottomNavBar(navController: NavHostController) {
             },
             icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
             label = { Text("Inicio") }
+        )
+
+        // Botón temporal para probar la pantalla de resultados
+        NavigationBarItem(
+            selected = currentDestination?.hierarchy?.any { it.route?.startsWith("resultado") == true } == true,
+            onClick = {
+                navController.navigate("resultado/1") {
+                    launchSingleTop = true
+                }
+            },
+            icon = { Icon(Icons.Default.List, contentDescription = "Prueba") },
+            label = { Text("Prueba Res") }
         )
     }
 }
